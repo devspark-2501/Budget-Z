@@ -23,6 +23,8 @@ import ExpenseLedger from './components/ExpenseLedger';
 import AnalyticsCharts from './components/AnalyticsCharts';
 import EmergencyModal from './components/EmergencyModal';
 import AuditModal from './components/AuditModal';
+import DecisionSimulator from './components/DecisionSimulator';
+import CommitmentsSection from './components/CommitmentsSection';
 
 ChartJS.register(
   CategoryScale,
@@ -44,6 +46,10 @@ export default function BudgetZApp() {
   const [selectedMonth, setSelectedMonth] = useState('October');
 
   const [expenses, setExpenses] = useState([]);
+  const [commitments, setCommitments] = useState([
+    { id: 1, name: 'Netflix', amount: 649, type: 'Subscription' },
+    { id: 2, name: 'Hostel WiFi', amount: 500, type: 'Fixed Commitment' }
+  ]);
 
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Food & Dining');
@@ -61,26 +67,30 @@ export default function BudgetZApp() {
 
   const numBudget = Number(totalBudget) || 10000;
   const numSavings = Number(savingsTarget) || 0;
-  const totalSpent = useMemo(() => expenses.reduce((a, b) => a + b.amount, 0), [expenses]);
+  
+  const totalCommitments = useMemo(() => commitments.reduce((a, b) => a + b.amount, 0), [commitments]);
+  const totalExpenses = useMemo(() => expenses.reduce((a, b) => a + b.amount, 0), [expenses]);
+  const totalSpent = totalExpenses + totalCommitments;
+
   const remainingBalance = numBudget - totalSpent;
   const isTargetBreached = remainingBalance < numSavings;
   const dailyAllowance = Math.max(0, Math.round(remainingBalance / 30));
 
   const riskLevel = useMemo(() => {
-    if (remainingBalance < numSavings) return { level: 'High Risk 🔴', color: 'bg-red-50 text-red-700 border-red-200' };
-    if (remainingBalance < numSavings + 1500) return { level: 'Moderate Risk 🟡', color: 'bg-amber-50 text-amber-700 border-amber-200' };
-    return { level: 'Healthy 🟢', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+    if (remainingBalance < numSavings) return { level: 'High Financial Risk 🔴', color: 'bg-red-50 text-red-700 border-red-200' };
+    if (remainingBalance < numSavings + 1000) return { level: 'Moderate Financial Risk 🟡', color: 'bg-amber-50 text-amber-700 border-amber-200' };
+    return { level: 'Optimal Financial Health 🟢', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
   }, [remainingBalance, numSavings]);
 
   const handleLockAndStart = (e) => {
     e.preventDefault();
     if (!totalBudget || !savingsTarget) return;
     setStep('dashboard');
-    triggerToast(`Budget Locked! ₹${totalBudget} bag active for 30 Days in ${selectedMonth}.`, 'success');
+    triggerToast(`Income & Budget Locked! ₹${totalBudget} bag active for 30 Days.`, 'success');
   };
 
   const handleReconfigure = () => {
-    if (window.confirm('Resetting will clear all current expenses and reboot your 30-day simulator. Continue?')) {
+    if (window.confirm('Resetting will clear all current records and reboot your 30-day simulator. Continue?')) {
       setExpenses([]);
       setStep('setup');
       triggerToast('Simulator reset to blank state.', 'info');
@@ -108,25 +118,32 @@ export default function BudgetZApp() {
     setAmount('');
 
     if (newRem < numSavings) {
-      triggerToast(`⚠️ ALERT: Expense added! You breached your ₹${numSavings} savings goal! ₹${newRem} left.`, 'danger');
+      triggerToast(`⚠️ ALERT: Savings goal breached! ₹${newRem} remaining in balance.`, 'danger');
     } else {
-      triggerToast(`Expense added! You have ₹${newRem} remaining in your bag.`, 'success');
+      triggerToast(`Expense added successfully! Remaining balance: ₹${newRem}`, 'success');
     }
   };
 
   const handleDeleteExpense = (id) => {
-    const item = expenses.find((e) => e.id === id);
     setExpenses((prev) => prev.filter((e) => e.id !== id));
-    if (item) {
-      triggerToast(`Removed "${item.title}". ₹${item.amount} returned to budget.`, 'info');
-    }
+    triggerToast('Expense deleted and balance updated.', 'info');
+  };
+
+  const handleAddCommitment = (c) => {
+    setCommitments((prev) => [c, ...prev]);
+    triggerToast(`Added commitment: ${c.name} (-₹${c.amount})`, 'info');
+  };
+
+  const handleDeleteCommitment = (id) => {
+    setCommitments((prev) => prev.filter((c) => c.id !== id));
+    triggerToast('Commitment removed.', 'info');
   };
 
   const injectEmergency = (type, cost) => {
     const newExp = {
       id: Date.now(),
-      title: `🚨 Emergency: ${type}`,
-      category: 'Emergency Shock',
+      title: `🚨 Unexpected Expense: ${type}`,
+      category: 'Unexpected Expenses',
       day: selectedDay,
       month: selectedMonth,
       amount: cost,
@@ -135,12 +152,12 @@ export default function BudgetZApp() {
 
     setExpenses((prev) => [newExp, ...prev]);
     setShowEmergencyModal(false);
-    triggerToast(`🚨 EMERGENCY HIT: -₹${cost} deducted for ${type}!`, 'danger');
+    triggerToast(`🚨 UNEXPECTED EXPENSE SHOCK: -₹${cost} deducted!`, 'danger');
   };
 
   const lineChartData = useMemo(() => {
     const days = Array.from({ length: 30 }, (_, i) => i + 1);
-    let runningBalance = numBudget;
+    let runningBalance = numBudget - totalCommitments;
 
     const dataPoints = days.map((day) => {
       const dayExpenses = expenses.filter((e) => e.day === day);
@@ -153,7 +170,7 @@ export default function BudgetZApp() {
       labels: days.map((d) => `Day ${d}`),
       datasets: [
         {
-          label: 'Remaining Balance (₹)',
+          label: 'Monthly Forecast Balance (₹)',
           data: dataPoints,
           borderColor: '#0284c7',
           backgroundColor: 'rgba(2, 132, 199, 0.1)',
@@ -169,22 +186,27 @@ export default function BudgetZApp() {
         },
       ],
     };
-  }, [expenses, numBudget, numSavings]);
+  }, [expenses, numBudget, numSavings, totalCommitments]);
 
   const categoryData = useMemo(() => {
-    const cats = ['Food & Dining', 'Subscriptions', 'Shopping', 'Travel', 'Emergency Shock', 'Impulse / Misc'];
-    const sums = cats.map((cat) => expenses.filter((e) => e.category === cat).reduce((a, b) => a + b.amount, 0));
+    const cats = ['Food & Dining', 'Subscriptions', 'Shopping', 'Travel', 'Unexpected Expenses', 'Fixed Commitment'];
+    const sums = cats.map((cat) => {
+      if (cat === 'Fixed Commitment' || cat === 'Subscriptions') {
+        return commitments.filter(c => c.type === cat || (cat === 'Subscriptions' && c.type === 'Subscription')).reduce((a,b)=>a+b.amount,0);
+      }
+      return expenses.filter((e) => e.category === cat).reduce((a, b) => a + b.amount, 0);
+    });
 
     return {
       labels: cats,
       datasets: [
         {
           data: sums,
-          backgroundColor: ['#38bdf8', '#818cf8', '#f472b6', '#fbbf24', '#f87171', '#a3e635'],
+          backgroundColor: ['#38bdf8', '#818cf8', '#f472b6', '#fbbf24', '#f87171', '#34d399'],
         },
       ],
     };
-  }, [expenses]);
+  }, [expenses, commitments]);
 
   if (step === 'setup') {
     return (
@@ -220,6 +242,21 @@ export default function BudgetZApp() {
         dailyAllowance={dailyAllowance}
         riskLevel={riskLevel}
       />
+
+      {/* Interactive Simulator & Commitments Section */}
+      <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <DecisionSimulator
+          remainingBalance={remainingBalance}
+          savingsTarget={savingsTarget}
+          numBudget={numBudget}
+          dailyAllowance={dailyAllowance}
+        />
+        <CommitmentsSection
+          commitments={commitments}
+          onAddCommitment={handleAddCommitment}
+          onDeleteCommitment={handleDeleteCommitment}
+        />
+      </div>
 
       <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-5">
