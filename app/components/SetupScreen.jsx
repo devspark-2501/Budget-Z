@@ -11,19 +11,22 @@ export default function SetupScreen({
 }) {
   return (
     <main className="min-h-screen w-full bg-gradient-to-br from-sky-50 via-white to-blue-100 text-slate-800 flex flex-col justify-between p-6 md:p-12">
-      <div className="w-full max-w-5xl mx-auto">
+      
+      {/* Top Header Section with extra bottom spacing / padding */}
+      <div className="w-full max-w-5xl mx-auto pt-4 pb-8 md:pb-12">
         <span className="px-3.5 py-1 text-xs font-bold uppercase tracking-wider bg-blue-100 text-blue-700 rounded-full border border-blue-200">
           Gen Z Financial Simulator 💸
         </span>
         <h1 className="text-4xl md:text-6xl font-black tracking-tight mt-3 text-slate-900">
           Budget<span className="text-blue-600">Z</span>
         </h1>
-        <p className="text-slate-600 text-sm md:text-base mt-2 max-w-xl">
+        <p className="text-slate-600 text-sm md:text-base mt-3 max-w-xl leading-relaxed">
           Simulate decisions over a 30-day monthly limit. Lock your parameters, manage emergency shocks, and evaluate risk before going broke.
         </p>
       </div>
 
-      <div className="w-full max-w-xl mx-auto bg-white/90 backdrop-blur-md border border-sky-200/80 p-8 md:p-10 rounded-3xl shadow-xl shadow-blue-500/5 my-auto">
+      {/* Center Setup Card with comfortable margins */}
+      <div className="w-full max-w-xl mx-auto bg-white/90 backdrop-blur-md border border-sky-200/80 p-8 md:p-10 rounded-3xl shadow-xl shadow-blue-500/5 my-4">
         <h2 className="text-2xl font-black text-slate-900 mb-1">Setup Your 30-Day Vibe 🛠️</h2>
         <p className="text-xs text-slate-500 mb-6">No prebuilt data. Enter your initial parameters to configure the simulation.</p>
 
@@ -78,7 +81,8 @@ export default function SetupScreen({
         </form>
       </div>
 
-      <div className="w-full text-center text-xs text-slate-400 font-medium">
+      {/* Footer */}
+      <div className="w-full text-center text-xs text-slate-400 font-medium py-4">
         BudgetZ Hackathon Edition • Custom 30-Day Engine
       </div>
     </main>
