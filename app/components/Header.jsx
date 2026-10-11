@@ -18,7 +18,7 @@ export default function Header({
           Budget<span className="text-blue-600">Z</span> <span className="text-slate-300 font-light">|</span> Dashboard
         </h1>
         <p className="text-xs text-slate-500 mt-0.5">
-          Fixed Budget: <span className="font-bold text-slate-800">₹{numBudget}</span> | Savings Target: <span className="font-bold text-slate-800">₹{numSavings}</span>
+          Income/Budget: <span className="font-bold text-slate-800">₹{numBudget}</span> | Savings Target: <span className="font-bold text-slate-800">₹{numSavings}</span>
         </p>
       </div>
 
@@ -27,7 +27,7 @@ export default function Header({
           onClick={onOpenEmergency}
           className="px-4 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-2xl transition-all shadow-md shadow-amber-500/20 text-xs flex items-center gap-1.5"
         >
-          🚨 Emergency Shock Simulator
+          🚨 Unexpected Expense Shock
         </button>
 
         <button

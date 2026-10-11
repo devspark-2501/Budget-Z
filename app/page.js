@@ -12,6 +12,7 @@ import {
   Tooltip,
   Legend,
   ArcElement,
+  Filler,
 } from 'chart.js';
 
 import ToastNotification from './components/ToastNotification';
@@ -26,6 +27,7 @@ import AuditModal from './components/AuditModal';
 import DecisionSimulator from './components/DecisionSimulator';
 import CommitmentsSection from './components/CommitmentsSection';
 
+// Register ChartJS plugins including Filler
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -35,7 +37,8 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
+  Filler
 );
 
 export default function BudgetZApp() {
@@ -45,11 +48,9 @@ export default function BudgetZApp() {
   const [savingsTarget, setSavingsTarget] = useState('2500');
   const [selectedMonth, setSelectedMonth] = useState('October');
 
+  // CLEAN SLATE: Zero default dummy data
   const [expenses, setExpenses] = useState([]);
-  const [commitments, setCommitments] = useState([
-    { id: 1, name: 'Netflix', amount: 649, type: 'Subscription' },
-    { id: 2, name: 'Hostel WiFi', amount: 500, type: 'Fixed Commitment' }
-  ]);
+  const [commitments, setCommitments] = useState([]);
 
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Food & Dining');
@@ -68,8 +69,8 @@ export default function BudgetZApp() {
   const numBudget = Number(totalBudget) || 10000;
   const numSavings = Number(savingsTarget) || 0;
   
-  const totalCommitments = useMemo(() => commitments.reduce((a, b) => a + b.amount, 0), [commitments]);
-  const totalExpenses = useMemo(() => expenses.reduce((a, b) => a + b.amount, 0), [expenses]);
+  const totalCommitments = useMemo(() => (commitments || []).reduce((a, b) => a + b.amount, 0), [commitments]);
+  const totalExpenses = useMemo(() => (expenses || []).reduce((a, b) => a + b.amount, 0), [expenses]);
   const totalSpent = totalExpenses + totalCommitments;
 
   const remainingBalance = numBudget - totalSpent;
@@ -92,6 +93,7 @@ export default function BudgetZApp() {
   const handleReconfigure = () => {
     if (window.confirm('Resetting will clear all current records and reboot your 30-day simulator. Continue?')) {
       setExpenses([]);
+      setCommitments([]);
       setStep('setup');
       triggerToast('Simulator reset to blank state.', 'info');
     }
@@ -130,7 +132,7 @@ export default function BudgetZApp() {
   };
 
   const handleAddCommitment = (c) => {
-    setCommitments((prev) => [c, ...prev]);
+    setCommitments((prev) => [c, ...(prev || [])]);
     triggerToast(`Added commitment: ${c.name} (-₹${c.amount})`, 'info');
   };
 
@@ -160,7 +162,7 @@ export default function BudgetZApp() {
     let runningBalance = numBudget - totalCommitments;
 
     const dataPoints = days.map((day) => {
-      const dayExpenses = expenses.filter((e) => e.day === day);
+      const dayExpenses = (expenses || []).filter((e) => e.day === day);
       const spentOnDay = dayExpenses.reduce((a, b) => a + b.amount, 0);
       runningBalance -= spentOnDay;
       return runningBalance;
@@ -189,12 +191,12 @@ export default function BudgetZApp() {
   }, [expenses, numBudget, numSavings, totalCommitments]);
 
   const categoryData = useMemo(() => {
-    const cats = ['Food & Dining', 'Subscriptions', 'Shopping', 'Travel', 'Unexpected Expenses', 'Fixed Commitment'];
+    const cats = ['Food & Dining', 'Shopping', 'Travel', 'Unexpected Expenses', 'Fixed Commitment'];
     const sums = cats.map((cat) => {
-      if (cat === 'Fixed Commitment' || cat === 'Subscriptions') {
-        return commitments.filter(c => c.type === cat || (cat === 'Subscriptions' && c.type === 'Subscription')).reduce((a,b)=>a+b.amount,0);
+      if (cat === 'Fixed Commitment') {
+        return (commitments || []).reduce((a, b) => a + b.amount, 0);
       }
-      return expenses.filter((e) => e.category === cat).reduce((a, b) => a + b.amount, 0);
+      return (expenses || []).filter((e) => e.category === cat).reduce((a, b) => a + b.amount, 0);
     });
 
     return {
@@ -202,7 +204,7 @@ export default function BudgetZApp() {
       datasets: [
         {
           data: sums,
-          backgroundColor: ['#38bdf8', '#818cf8', '#f472b6', '#fbbf24', '#f87171', '#34d399'],
+          backgroundColor: ['#38bdf8', '#f472b6', '#fbbf24', '#f87171', '#34d399'],
         },
       ],
     };
@@ -243,13 +245,11 @@ export default function BudgetZApp() {
         riskLevel={riskLevel}
       />
 
-      {/* Interactive Simulator & Commitments Section */}
       <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DecisionSimulator
           remainingBalance={remainingBalance}
           savingsTarget={savingsTarget}
           numBudget={numBudget}
-          dailyAllowance={dailyAllowance}
         />
         <CommitmentsSection
           commitments={commitments}
@@ -269,7 +269,6 @@ export default function BudgetZApp() {
             setAmount={setAmount}
             selectedDay={selectedDay}
             setSelectedDay={setSelectedDay}
-            selectedMonth={selectedMonth}
             onAddExpense={handleAddExpense}
           />
         </div>

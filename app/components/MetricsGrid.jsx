@@ -10,7 +10,7 @@ export default function MetricsGrid({
   return (
     <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       <div className="bg-white/80 border border-sky-200 p-5 rounded-2xl shadow-sm">
-        <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Budget</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Income / Budget</p>
         <h3 className="text-2xl font-black text-slate-900 mt-1">₹{numBudget}</h3>
       </div>
 
@@ -32,7 +32,7 @@ export default function MetricsGrid({
       </div>
 
       <div className={`border p-5 rounded-2xl shadow-sm ${riskLevel.color}`}>
-        <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Financial Health Risk</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Financial Risk & Health</p>
         <h3 className="text-base font-black mt-1">{riskLevel.level}</h3>
       </div>
     </div>

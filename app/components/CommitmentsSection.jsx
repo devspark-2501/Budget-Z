@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 
-export default function CommitmentsSection({ commitments, onAddCommitment, onDeleteCommitment }) {
+export default function CommitmentsSection({ commitments = [], onAddCommitment, onDeleteCommitment }) {
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const [type, setType] = useState('Subscription');
@@ -57,18 +57,22 @@ export default function CommitmentsSection({ commitments, onAddCommitment, onDel
       </form>
 
       <div className="space-y-2 max-h-36 overflow-y-auto">
-        {commitments.map((c) => (
-          <div key={c.id} className="flex justify-between items-center p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-            <div>
-              <span className="font-bold text-slate-900">{c.name}</span>
-              <span className="ml-2 text-[10px] bg-slate-200 px-1.5 py-0.5 rounded text-slate-700">{c.type}</span>
+        {commitments.length === 0 ? (
+          <p className="text-xs text-slate-400 text-center py-4">No commitments or subscriptions added yet.</p>
+        ) : (
+          commitments.map((c) => (
+            <div key={c.id} className="flex justify-between items-center p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+              <div>
+                <span className="font-bold text-slate-900">{c.name}</span>
+                <span className="ml-2 text-[10px] bg-slate-200 px-1.5 py-0.5 rounded text-slate-700">{c.type}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-bold text-red-600">-₹{c.amount}</span>
+                <button onClick={() => onDeleteCommitment(c.id)} className="text-slate-400 hover:text-red-600 font-bold">✕</button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono font-bold text-red-600">-₹{c.amount}</span>
-              <button onClick={() => onDeleteCommitment(c.id)} className="text-slate-400 hover:text-red-600 font-bold">✕</button>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

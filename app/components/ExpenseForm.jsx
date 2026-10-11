@@ -9,7 +9,6 @@ export default function ExpenseForm({
   setAmount,
   selectedDay,
   setSelectedDay,
-  selectedMonth,
   onAddExpense,
 }) {
   return (
@@ -27,7 +26,7 @@ export default function ExpenseForm({
             placeholder="e.g. Swiggy Binge, Metro Pass"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-blue-500"
+            className="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none"
             required
           />
         </div>
@@ -38,10 +37,9 @@ export default function ExpenseForm({
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-blue-500"
+              className="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none"
             >
               <option value="Food & Dining">🍕 Food & Dining</option>
-              <option value="Subscriptions">💻 Subscriptions</option>
               <option value="Shopping">🛍️ Shopping</option>
               <option value="Travel">🚕 Travel</option>
               <option value="Impulse / Misc">🎲 Impulse / Misc</option>
@@ -55,13 +53,12 @@ export default function ExpenseForm({
               placeholder="e.g. 450"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:border-blue-500"
+              className="w-full bg-sky-50/50 border border-sky-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none"
               required
             />
           </div>
         </div>
 
-        {/* Compact 30-Day Compact Calendar Selector */}
         <div>
           <div className="flex justify-between items-center mb-1.5">
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">
